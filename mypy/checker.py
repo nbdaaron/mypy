@@ -165,6 +165,8 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
     return_types = None  # type: List[Type]
     # Flags; true for dynamically typed functions
     dynamic_funcs = None  # type: List[bool]
+    # Stack of FuncDef objects for callstack
+    funcs_stack = None  # type: List[FuncDef]
     # Stack of collections of variables with partial types
     partial_types = None  # type: List[PartialTypeScope]
     # Vars for which partial type errors are already reported
@@ -221,6 +223,7 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
         self.globals = tree.names
         self.return_types = []
         self.dynamic_funcs = []
+        self.funcs_stack = []
         self.partial_types = []
         self.partial_reported = set()
         self.deferred_nodes = []
@@ -763,6 +766,7 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
         If type_override is provided, use it as the function type.
         """
         self.dynamic_funcs.append(defn.is_dynamic() and not type_override)
+        self.funcs_stack.append(defn)
 
         with self.enter_partial_types(is_function=True):
             typ = self.function_type(defn)
@@ -775,6 +779,7 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
                 raise RuntimeError('Not supported')
 
         self.dynamic_funcs.pop()
+        self.funcs_stack.pop()
         self.current_node_deferred = False
 
     @contextmanager
@@ -838,7 +843,7 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
                              typ.ret_type)
 
                 # Check that Generator functions have the appropriate return type.
-                if defn.is_generator:
+                if defn.is_generator and not defn.is_asynq:
                     if defn.is_async_generator:
                         if not self.is_async_generator_return_type(typ.ret_type):
                             self.fail(message_registry.INVALID_RETURN_TYPE_FOR_ASYNC_GENERATOR,

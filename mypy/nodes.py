@@ -562,7 +562,7 @@ class Argument(Node):
 
 FUNCITEM_FLAGS = FUNCBASE_FLAGS + [
     'is_overload', 'is_generator', 'is_coroutine', 'is_async_generator',
-    'is_awaitable_coroutine',
+    'is_awaitable_coroutine', 'is_asynq',
 ]  # type: Final
 
 
@@ -583,6 +583,7 @@ class FuncItem(FuncBase):
                  'is_async_generator',  # Is an async def generator?
                  'is_awaitable_coroutine',  # Decorated with '@{typing,asyncio}.coroutine'?
                  'expanded',  # Variants of function with type variables with values expanded
+                 'is_asynq',  # Is func decorated with @asynq.asynq()?
                  )
 
     def __init__(self,
@@ -602,6 +603,7 @@ class FuncItem(FuncBase):
         self.is_coroutine = False
         self.is_async_generator = False
         self.is_awaitable_coroutine = False
+        self.is_asynq = False
         self.expanded = []  # type: List[FuncItem]
 
         self.min_args = 0
