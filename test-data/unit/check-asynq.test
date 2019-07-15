@@ -1,0 +1,38 @@
+-- Tests for the asynq library
+-- ---------------------------
+
+[case testAsynqBasic]
+from asynq import asynq
+
+@asynq()
+def f() -> int:
+    return 3
+
+@asynq()
+def g() -> int:
+    reveal_type(f.asynq())  # N: Revealed type is 'asynq.AsyncTask[builtins.int*]'
+    x = yield f.asynq()
+    reveal_type(x)  # N: Revealed type is 'builtins.int*'
+    return x
+
+[builtins fixtures/asynq.pyi]
+
+[case testAsynqComplexYield]
+from asynq import asynq
+
+@asynq()
+def f() -> int:
+    return 3
+
+@asynq()
+def g() -> int:
+    x, y = yield f.asynq(), f.asynq()
+    reveal_type(x)  # N: Revealed type is 'builtins.int*'
+    reveal_type(y)  # N: Revealed type is 'builtins.int*'
+    xs = yield [f.asynq() for _ in range(10)]
+    reveal_type(xs)  # N: Revealed type is 'builtins.list[builtins.int*]'
+    ys = yield {i: f.asynq() for i in range(10)}
+    reveal_type(ys)  # N: Revealed type is 'builtins.dict[builtins.int*, builtins.int*]'
+    return x
+
+[builtins fixtures/asynq.pyi]

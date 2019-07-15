@@ -24,6 +24,7 @@ from mypy.newsemanal.semanal_main import core_modules
 
 # List of files that contain test case descriptions.
 typecheck_files = [
+    'check-asynq.test',
     'check-basic.test',
     'check-callable.test',
     'check-classes.test',
@@ -84,7 +85,7 @@ typecheck_files = [
     'check-redefine.test',
     'check-literal.test',
     'check-newsemanal.test',
-    'check-inline-config.test',
+    'check-inline-config.test'
 ]
 
 # Tests that use Python 3.8-only AST features (like expression-scoped ignores):

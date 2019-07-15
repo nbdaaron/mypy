@@ -967,6 +967,8 @@ class NewSemanticAnalyzer(NodeVisitor[None],
                     removed.append(i)
                 else:
                     self.fail("@final cannot be used with non-method functions", d)
+            elif isinstance(d, CallExpr) and refers_to_fullname(d.callee, 'asynq.asynq'):
+                dec.func.is_asynq = True
         for i in reversed(removed):
             del dec.decorators[i]
         if (not dec.is_overload or dec.var.is_property) and self.type:
