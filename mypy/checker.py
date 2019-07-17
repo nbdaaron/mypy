@@ -1477,6 +1477,22 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
                                     original_class_or_static,
                                     override_class_or_static,
                                     context)
+            elif isinstance(original_type, FunctionLike) and context.is_asynq:
+                # If asynq method extends non-asynq method,
+                # compare signature of decorated method to
+                # parent class method. If they match, allow it.
+                # (asynq methods can be called like regular methods)
+                original = self.bind_and_map_method(base_attr, original_type,
+                                                    defn.info, base)
+                typ = bind_self(self.function_type(context), self.scope.active_self_type())
+                self.check_override(typ,
+                                    original,
+                                    defn.name(),
+                                    name,
+                                    base.name(),
+                                    original_class_or_static,
+                                    override_class_or_static,
+                                    context)
             elif is_equivalent(original_type, typ):
                 # Assume invariance for a non-callable attribute here. Note
                 # that this doesn't affect read-only properties which can have
@@ -1613,7 +1629,6 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
                         if is_subtype(child_variant, parent_variant):
                             order.append(i)
                             break
-
                 if len(order) == len(original.items()) and order != sorted(order):
                     self.msg.overload_signature_incompatible_with_supertype(
                         name, name_in_super, supertype, override, node)
