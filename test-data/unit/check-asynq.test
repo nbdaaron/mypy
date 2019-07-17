@@ -10,7 +10,7 @@ def f() -> int:
 
 @asynq()
 def g() -> int:
-    reveal_type(f.asynq())  # N: Revealed type is 'asynq.AsyncTask[builtins.int*]'
+    reveal_type(f.asynq())  # N: Revealed type is 'asynq.async_task.AsyncTask[builtins.int*]'
     x = yield f.asynq()
     reveal_type(x)  # N: Revealed type is 'builtins.int*'
     return x
@@ -26,6 +26,8 @@ def f() -> int:
 
 @asynq()
 def g() -> int:
+    a = yield f.asynq()
+    reveal_type(a) # N: Revealed type is 'builtins.int*'
     x, y = yield f.asynq(), f.asynq()
     reveal_type(x)  # N: Revealed type is 'builtins.int*'
     reveal_type(y)  # N: Revealed type is 'builtins.int*'
@@ -64,4 +66,13 @@ class AsyncA(A):
     def func(self) -> int:
         return 4
 
+[builtins fixtures/asynq.pyi]
+
+[case testAsyncYieldNone]
+from asynq import asynq
+
+@asynq()
+def x() -> int:
+    yield
+    return 5
 [builtins fixtures/asynq.pyi]

@@ -1,11 +1,9 @@
 from typing import Any, Callable, Generic, TypeVar
+from .async_task import AsyncTask
 
 _CT = TypeVar('_CT', bound=Callable[..., Any])
 _T = TypeVar('_T')
 _ReturnT = TypeVar('_ReturnT')
-
-class AsyncTask(Generic[_T]):
-    def value(self) -> _T: ...
 
 class _AsyncDecoratorFunction(Generic[_ReturnT]):
     def __call__(self, *args: Any, **kwargs: Any) -> _ReturnT: ...

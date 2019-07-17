@@ -3499,15 +3499,14 @@ class ExpressionChecker(ExpressionVisitor[Type]):
     def visit_yield_expr(self, e: YieldExpr) -> Type:
         if self.chk.funcs_stack and self.chk.funcs_stack[-1].is_asynq:
             if e.expr is None:
-                self.chk.fail(message_registry.YIELD_VALUE_EXPECTED, e)
-                return AnyType(TypeOfAny.from_error)
+                return AnyType(TypeOfAny.unannotated)
             actual_type = self.accept(e.expr)
-            if is_named_instance(actual_type, 'asynq.AsyncTask') or is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
+            if is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
                 return actual_type.args[0]
             elif isinstance(actual_type, TupleType):
                 items = []  # type: List[Type]
                 for item in actual_type.items:
-                    if is_named_instance(item, 'asynq.AsyncTask') or is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
+                    if is_named_instance(item, 'asynq.async_task.AsyncTask'):
                         items.append(item.args[0])
                     elif isinstance(item, NoneType):
                         items.append(item)
@@ -3517,15 +3516,15 @@ class ExpressionChecker(ExpressionVisitor[Type]):
                     return actual_type.copy_modified(items=items)
             elif is_named_instance(actual_type, 'builtins.tuple'):
                 arg = actual_type.args[0]
-                if is_named_instance(arg, 'asynq.AsyncTask') or is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
+                if is_named_instance(arg, 'asynq.async_task.AsyncTask'):
                     return self.chk.named_generic_type('builtins.tuple', [arg.args[0]])
             elif is_named_instance(actual_type, 'builtins.list'):
                 arg = actual_type.args[0]
-                if is_named_instance(arg, 'asynq.AsyncTask') or is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
+                if is_named_instance(arg, 'asynq.async_task.AsyncTask'):
                     return self.chk.named_generic_type('builtins.list', [arg.args[0]])
             elif is_named_instance(actual_type, 'builtins.dict'):
                 arg = actual_type.args[1]
-                if is_named_instance(arg, 'asynq.AsyncTask') or is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
+                if is_named_instance(arg, 'asynq.async_task.AsyncTask'):
                     return self.chk.named_generic_type('builtins.dict', [actual_type.args[0], arg.args[0]])
             elif isinstance(actual_type, AnyType):
                 return AnyType(TypeOfAny.from_another_any, source_any=actual_type)
