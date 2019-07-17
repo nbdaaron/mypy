@@ -36,3 +36,32 @@ def g() -> int:
     return x
 
 [builtins fixtures/asynq.pyi]
+
+[case testAsynqExtendAsync]
+from asynq import asynq
+
+class A(object):
+    @asynq()
+    def func(self) -> int:
+        return 3
+
+class AsyncA(A):
+    @asynq()
+    def func(self) -> int:
+        return 4
+
+[builtins fixtures/asynq.pyi]
+
+[case testAsynqExtendSync]
+from asynq import asynq
+
+class A(object):
+    def func(self) -> int:
+        return 3
+
+class AsyncA(A):
+    @asynq()
+    def func(self) -> int:
+        return 4
+
+[builtins fixtures/asynq.pyi]
