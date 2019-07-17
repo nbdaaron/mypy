@@ -3502,12 +3502,12 @@ class ExpressionChecker(ExpressionVisitor[Type]):
                 return AnyType(TypeOfAny.unannotated)
             actual_type = self.accept(e.expr)
             if is_named_instance(actual_type, 'asynq.async_task.AsyncTask'):
-                return actual_type.args[0]
+                return cast(Instance, actual_type).args[0]
             elif isinstance(actual_type, TupleType):
                 items = []  # type: List[Type]
                 for item in actual_type.items:
                     if is_named_instance(item, 'asynq.async_task.AsyncTask'):
-                        items.append(item.args[0])
+                        items.append(cast(Instance, item).args[0])
                     elif isinstance(item, NoneType):
                         items.append(item)
                     else:
@@ -3515,17 +3515,21 @@ class ExpressionChecker(ExpressionVisitor[Type]):
                 else:
                     return actual_type.copy_modified(items=items)
             elif is_named_instance(actual_type, 'builtins.tuple'):
-                arg = actual_type.args[0]
+                arg = cast(Instance, actual_type).args[0]
                 if is_named_instance(arg, 'asynq.async_task.AsyncTask'):
+                    arg = cast(Instance, arg)
                     return self.chk.named_generic_type('builtins.tuple', [arg.args[0]])
             elif is_named_instance(actual_type, 'builtins.list'):
-                arg = actual_type.args[0]
+                arg = cast(Instance, actual_type).args[0]
                 if is_named_instance(arg, 'asynq.async_task.AsyncTask'):
+                    arg = cast(Instance, arg)
                     return self.chk.named_generic_type('builtins.list', [arg.args[0]])
             elif is_named_instance(actual_type, 'builtins.dict'):
-                arg = actual_type.args[1]
+                arg = cast(Instance, actual_type).args[1]
                 if is_named_instance(arg, 'asynq.async_task.AsyncTask'):
-                    return self.chk.named_generic_type('builtins.dict', [actual_type.args[0], arg.args[0]])
+                    instance = cast(Instance, actual_type)
+                    return self.chk.named_generic_type('builtins.dict',
+                        [instance.args[0], instance.args[0]])
             elif isinstance(actual_type, AnyType):
                 return AnyType(TypeOfAny.from_another_any, source_any=actual_type)
             else:

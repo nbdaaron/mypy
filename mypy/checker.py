@@ -166,7 +166,7 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
     # Flags; true for dynamically typed functions
     dynamic_funcs = None  # type: List[bool]
     # Stack of FuncDef objects for callstack
-    funcs_stack = None  # type: List[FuncDef]
+    funcs_stack = None  # type: List[FuncItem]
     # Stack of collections of variables with partial types
     partial_types = None  # type: List[PartialTypeScope]
     # Vars for which partial type errors are already reported
@@ -1477,7 +1477,7 @@ class TypeChecker(NodeVisitor[None], CheckerPluginInterface):
                                     original_class_or_static,
                                     override_class_or_static,
                                     context)
-            elif isinstance(original_type, FunctionLike) and context.is_asynq:
+            elif isinstance(original_type, FunctionLike) and cast(FuncDef, context).is_asynq:
                 # If asynq method extends non-asynq method,
                 # compare signature of decorated method to
                 # parent class method. If they match, allow it.
